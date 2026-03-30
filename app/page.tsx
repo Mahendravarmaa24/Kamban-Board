@@ -105,7 +105,7 @@ export default function Home() {
       data: { session },
     } = await supabase.auth.getSession();
 
-    let currentUserId = session?.user?.id;
+    let currentUserId = session?.user?.id ?? null;
 
     if (!currentUserId) {
       const { data, error } = await supabase.auth.signInAnonymously();
@@ -113,6 +113,11 @@ export default function Home() {
       if (error) {
         console.error('Anonymous sign-in error:', error.message);
         setErrorMessage(error.message);
+        return;
+      }
+
+      if (!data.user) {
+        setErrorMessage('Unable to create anonymous user.');
         return;
       }
 
@@ -201,127 +206,26 @@ export default function Home() {
       }}
     >
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        <h1
-          style={{
-            fontSize: '32px',
-            fontWeight: 700,
-            marginBottom: '8px',
-            color: '#f9fafb',
-          }}
-        >
-          Mahendravarmaa&apos;s Kanban Board
+        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#f9fafb' }}>
+          Mahendravarmaa's Kanban Board
         </h1>
 
-        <p
-          style={{
-            color: '#9ca3af',
-            marginBottom: '24px',
-            fontSize: '15px',
-          }}
-        >
+        <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
           Make each day your masterpiece
         </p>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-            gap: '12px',
-            marginBottom: '24px',
-          }}
-        >
-          <div
-            style={{
-              background: '#1a1a1a',
-              padding: '16px',
-              borderRadius: '12px',
-              border: '1px solid #2a2a2a',
-            }}
-          >
-            <div style={{ color: '#9ca3af', fontSize: '13px' }}>Total Tasks</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#f97316' }}>
-              {totalTasks}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: '#1a1a1a',
-              padding: '16px',
-              borderRadius: '12px',
-              border: '1px solid #2a2a2a',
-            }}
-          >
-            <div style={{ color: '#9ca3af', fontSize: '13px' }}>In Progress</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#f97316' }}>
-              {inProgressTasks}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: '#1a1a1a',
-              padding: '16px',
-              borderRadius: '12px',
-              border: '1px solid #2a2a2a',
-            }}
-          >
-            <div style={{ color: '#9ca3af', fontSize: '13px' }}>In Review</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#f97316' }}>
-              {reviewTasks}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: '#1a1a1a',
-              padding: '16px',
-              borderRadius: '12px',
-              border: '1px solid #2a2a2a',
-            }}
-          >
-            <div style={{ color: '#9ca3af', fontSize: '13px' }}>Completed</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#f97316' }}>
-              {completedTasks}
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: '#1a1a1a',
-              padding: '16px',
-              borderRadius: '12px',
-              border: '1px solid #2a2a2a',
-            }}
-          >
-            <div style={{ color: '#9ca3af', fontSize: '13px' }}>Overdue</div>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#f97316' }}>
-              {overdueTasks}
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            marginBottom: '16px',
-            flexWrap: 'wrap',
-          }}
-        >
+        {/* Input */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
           <input
-            type="text"
             placeholder="Enter task"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             style={{
-              padding: '12px 14px',
-              width: '260px',
-              border: '1px solid #333333',
+              padding: '12px',
+              background: '#111',
+              color: '#fff',
+              border: '1px solid #333',
               borderRadius: '10px',
-              outline: 'none',
-              background: '#111111',
-              color: '#f9fafb',
             }}
           />
 
@@ -330,81 +234,55 @@ export default function Home() {
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             style={{
-              padding: '12px 14px',
-              border: '1px solid #333333',
+              padding: '12px',
+              background: '#111',
+              color: '#fff',
+              border: '1px solid #333',
               borderRadius: '10px',
-              outline: 'none',
-              background: '#111111',
-              color: '#f9fafb',
             }}
           />
 
           <button
             onClick={addTask}
             style={{
-              padding: '12px 18px',
-              border: 'none',
-              borderRadius: '10px',
               background: '#f97316',
-              color: '#ffffff',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(249, 115, 22, 0.35)',
+              color: '#fff',
+              padding: '12px 16px',
+              borderRadius: '10px',
+              border: 'none',
             }}
           >
             Add Task
           </button>
         </div>
 
-        <div style={{ marginBottom: '24px' }}>
-          <input
-            type="text"
-            placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              padding: '12px 14px',
-              width: '260px',
-              border: '1px solid #333333',
-              borderRadius: '10px',
-              outline: 'none',
-              background: '#111111',
-              color: '#f9fafb',
-            }}
-          />
-        </div>
+        {/* Search */}
+        <input
+          placeholder="Search tasks..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            marginBottom: '20px',
+            padding: '10px',
+            background: '#111',
+            color: '#fff',
+            border: '1px solid #333',
+            borderRadius: '10px',
+          }}
+        />
 
-        {errorMessage && (
-          <div
-            style={{
-              marginBottom: '20px',
-              padding: '12px 14px',
-              borderRadius: '10px',
-              background: '#3b0d0d',
-              color: '#fca5a5',
-              border: '1px solid #7f1d1d',
-            }}
-          >
-            {errorMessage}
-          </div>
-        )}
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
         {loading ? (
-          <p style={{ color: '#9ca3af' }}>Loading tasks...</p>
+          <p style={{ color: '#aaa' }}>Loading...</p>
         ) : (
           <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-                gap: '16px',
-              }}
-            >
-              {columns.map((column) => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px' }}>
+              {columns.map((col) => (
                 <Column
-                  key={column.id}
-                  column={column}
-                  tasks={filteredTasks.filter((task) => task.status === column.id)}
+                  key={col.id}
+                  column={col}
+                  tasks={filteredTasks.filter((t) => t.status === col.id)}
                 />
               ))}
             </div>
